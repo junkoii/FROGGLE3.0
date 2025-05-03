@@ -1,0 +1,20 @@
+{
+  "name": "froggle-backend",
+  "version": "1.0.0",
+  "description": "Backend server for FROGGLE presale",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "axios": "^1.4.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "@solana/web3.js": "^1.75.0",
+    "@solana/spl-token": "^0.3.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+} 

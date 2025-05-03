@@ -1,0 +1,76 @@
+{
+  "purchases": [
+    {
+      "walletAddress": "59Hd7PdEkzF9QZRm53yaRMkUggFadthoKrZmiyBKCySB",
+      "amountSOL": 0.5,
+      "froggleAmount": 51000,
+      "transactionId": "4gefJoPxSCNUnhUmGbPMmfL9hh6MqNrqapne1tbahWVUhEqMirZhtYM7sMMe7ydSBRZP9vuLmPVLXr14Sp1mK6C5",
+      "currency": "SOL",
+      "timestamp": "2025-05-01T21:23:56.664Z"
+    },
+    {
+      "walletAddress": "59Hd7PdEkzF9QZRm53yaRMkUggFadthoKrZmiyBKCySB",
+      "amountSOL": 0.1,
+      "froggleAmount": 10200,
+      "transactionId": "2PGcbMf66yqW59Up9CX7TD3YUYKrsgkWYCJ9NSRPgjA3zF48sbomfpNMDpyRfDppER35q4bKyoeksuipubTGpNTj",
+      "currency": "SOL",
+      "timestamp": "2025-05-01T22:27:07.624Z"
+    },
+    {
+      "walletAddress": "59Hd7PdEkzF9QZRm53yaRMkUggFadthoKrZmiyBKCySB",
+      "amountSOL": 0.1,
+      "froggleAmount": 10200,
+      "transactionId": "VXDYi5mupkhp8xGWnose2JEBtzmTNzfSQn3opqvq95n3oq4cfA6bbbMaX1AS766D7qQdzSaAaDVoxmAH6W3A4fL",
+      "currency": "SOL",
+      "timestamp": "2025-05-02T14:51:13.514Z"
+    },
+    {
+      "walletAddress": "59Hd7PdEkzF9QZRm53yaRMkUggFadthoKrZmiyBKCySB",
+      "amountSOL": 0.1,
+      "froggleAmount": 10200,
+      "transactionId": "3U2HbMTAP8kT8ecWtbZVDfpn7An5BQ8bVjtp7xaFGYjDSmduCpD7xgJxEtZ5MHnNkY46e3CA4fmjXG4SmNfBwWgJ",
+      "currency": "SOL",
+      "timestamp": "2025-05-02T15:07:29.334Z"
+    },
+    {
+      "walletAddress": "59Hd7PdEkzF9QZRm53yaRMkUggFadthoKrZmiyBKCySB",
+      "amountUSDT": 1,
+      "froggleAmount": 1000,
+      "transactionId": "SIMULATED_USDT_TX_1746200494961",
+      "currency": "USDT",
+      "timestamp": "2025-05-02T15:41:34.978Z"
+    },
+    {
+      "walletAddress": "59Hd7PdEkzF9QZRm53yaRMkUggFadthoKrZmiyBKCySB",
+      "amountUSDT": 1,
+      "froggleAmount": 1000,
+      "transactionId": "SIMULATED_USDT_TX_1746218097633",
+      "currency": "USDT",
+      "timestamp": "2025-05-02T20:34:57.641Z"
+    },
+    {
+      "walletAddress": "59Hd7PdEkzF9QZRm53yaRMkUggFadthoKrZmiyBKCySB",
+      "amountUSDT": 1,
+      "froggleAmount": 1000,
+      "transactionId": "SIMULATED_USDT_TX_1746218144886",
+      "currency": "USDT",
+      "timestamp": "2025-05-02T20:35:44.889Z"
+    },
+    {
+      "walletAddress": "59Hd7PdEkzF9QZRm53yaRMkUggFadthoKrZmiyBKCySB",
+      "amountUSDT": 50,
+      "froggleAmount": 50000,
+      "transactionId": "SIMULATED_USDT_TX_1746218165512",
+      "currency": "USDT",
+      "timestamp": "2025-05-02T20:36:05.515Z"
+    },
+    {
+      "walletAddress": "59Hd7PdEkzF9QZRm53yaRMkUggFadthoKrZmiyBKCySB",
+      "amountUSDT": 100000000,
+      "froggleAmount": 100000000000,
+      "transactionId": "SIMULATED_USDT_TX_1746218194286",
+      "currency": "USDT",
+      "timestamp": "2025-05-02T20:36:34.289Z"
+    }
+  ]
+}
