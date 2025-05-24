@@ -1,0 +1,34 @@
+{
+  "name": "FROGGLE",
+  "symbol": "FROGGLE",
+  "description": "FROGGLE is a revolutionary meme token on Solana blockchain, bringing fun and community together in the crypto space. Join the FROGGLE community and hop into the future of DeFi!",
+  "image": "https://froggle3-0.onrender.com/volofroggle.png",
+  "external_url": "https://froggle.io",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Meme Token"
+    },
+    {
+      "trait_type": "Blockchain",
+      "value": "Solana"
+    },
+    {
+      "trait_type": "Total Supply",
+      "value": "1,000,000,000"
+    },
+    {
+      "trait_type": "Decimals",
+      "value": "6"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "https://froggle3-0.onrender.com/volofroggle.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

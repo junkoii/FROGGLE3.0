@@ -534,6 +534,27 @@ app.get('/api/token-info', async (req, res) => {
   }
 });
 
+// Get token metadata
+app.get('/api/token-metadata', (req, res) => {
+  try {
+    const metadataPath = path.join(__dirname, 'froggle-metadata.json');
+    const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+    res.json({
+      success: true,
+      metadata: metadata,
+      metadataUri: `${req.protocol}://${req.get('host')}/api/token-metadata`
+    });
+  } catch (error) {
+    console.error('Error reading token metadata:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to load token metadata'
+    });
+  }
+});
+
+// Get token info (enhanced with metadata)
+
 // Serve static files from FRONTEND directory (AFTER API routes)
 app.use(express.static(path.join(__dirname, '../FRONTEND')));
 

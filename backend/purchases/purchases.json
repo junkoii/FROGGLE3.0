@@ -66,11 +66,48 @@
     },
     {
       "walletAddress": "59Hd7PdEkzF9QZRm53yaRMkUggFadthoKrZmiyBKCySB",
-      "amountUSDT": 100000000,
-      "froggleAmount": 100000000000,
-      "transactionId": "SIMULATED_USDT_TX_1746218194286",
+      "amountSOL": 0.005,
+      "froggleAmount": 510,
+      "transactionId": "L6KcELBJBTVFmkjmCRLwzL2CahjZ9g4rZAjzHvMRUjHPz2azAm2ZAchotZcceM4JhfwXrrdrMt55qwBrHXjwVSQ",
+      "currency": "SOL",
+      "timestamp": "2025-05-04T13:06:49.628Z",
+      "verified": true
+    },
+    {
+      "walletAddress": "59Hd7PdEkzF9QZRm53yaRMkUggFadthoKrZmiyBKCySB",
+      "amountSOL": 0.001,
+      "froggleAmount": 102,
+      "transactionId": "KtKfZvrpYaD2pASs6X8Z2hqe9AAbaRsKHdCZouGm9Yibx3nyTwc6pdjCzgfv6tE8Zq5S8EYdG5JL94g2Loq5zVF",
+      "currency": "SOL",
+      "timestamp": "2025-05-04T13:46:54.398Z",
+      "verified": true
+    },
+    {
+      "walletAddress": "59Hd7PdEkzF9QZRm53yaRMkUggFadthoKrZmiyBKCySB",
+      "amountUSDT": 0.4,
+      "froggleAmount": 400,
+      "transactionId": "2UJjjV9PXgGhvP8mJAiNvcd4xBLczAjEJYwiSTut8be5kU1fqfkz1KZegR5N19v1sgskmb9G7Q5yXtaqqEUUGetS",
       "currency": "USDT",
-      "timestamp": "2025-05-02T20:36:34.289Z"
+      "timestamp": "2025-05-04T14:23:36.163Z",
+      "verified": true
+    },
+    {
+      "walletAddress": "59Hd7PdEkzF9QZRm53yaRMkUggFadthoKrZmiyBKCySB",
+      "amountSOL": 0.001,
+      "froggleAmount": 147.95918367346937,
+      "transactionId": "64pTPAFwpYmxvoppDJrvrZucjPY2MYmzaZPtJwDvDBPUWsi7wPSJ1xBsRDz1BH5anD1poYRKpNVAUrZv3zw82aX1",
+      "currency": "SOL",
+      "timestamp": "2025-05-08T12:40:16.729Z",
+      "verified": true
+    },
+    {
+      "walletAddress": "59Hd7PdEkzF9QZRm53yaRMkUggFadthoKrZmiyBKCySB",
+      "amountSOL": 0.0001,
+      "froggleAmount": 15.832653061224493,
+      "transactionId": "4wEp5AM2yWuHXmSii4Np8nWfafvF2j1cj6gN74LHUwHTWB5yp3FduLuRjh1fKW5EbSRkXJE313keQ62vvWHU6H3a",
+      "currency": "SOL",
+      "timestamp": "2025-05-08T14:41:41.123Z",
+      "verified": true
     }
   ]
 }
