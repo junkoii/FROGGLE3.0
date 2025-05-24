@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>FROGGLE - Presale Platform</title>
     <meta name="description" content="Join the FROGGLE presale - The Frog Prince of Solana">
     
@@ -45,7 +48,7 @@
         }
     </style>
     
-    <!-- Tailwind CSS via CDN -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -82,7 +85,21 @@
     <script src="https://unpkg.com/@project-serum/anchor@0.25.0/dist/browser/anchor.min.js"></script>
     <script src="https://unpkg.com/@solana/wallet-adapter-base@latest/lib/index.iife.js"></script>
     <script src="https://unpkg.com/@solana/wallet-adapter-wallets@latest/lib/index.iife.js"></script>
-    <script src="https://unpkg.com/@solana/spl-token@0.3.7/lib/index.iife.min.js"></script>
+    <!-- Sostituisco SPL-Token con versione che crea un oggetto globale -->
+    <script src="https://cdn.jsdelivr.net/npm/@solana/spl-token@0.3.7/lib/index.iife.min.js"></script>
+    
+    <!-- Polyfill per Buffer nel browser -->
+    <script>
+        // Polyfill per Buffer nel browser
+        window.Buffer = window.Buffer || {
+            from: function(data) {
+                if (Array.isArray(data)) {
+                    return new Uint8Array(data);
+                }
+                return new Uint8Array(data);
+            }
+        };
+    </script>
     
     <!-- Custom Fonts per stile cartoon -->
     <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Fredoka+One&family=Bubblegum+Sans&family=Nunito:wght@400;700&family=Boogaloo&family=Patrick+Hand&family=Comic+Neue:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -146,6 +163,8 @@
             letter-spacing: 2px;
             text-shadow: 3px 3px 0px #4B0076; /* Melanzana Profondo */
             color: #FFFFFF; /* Testo bianco per titoli */
+            -webkit-text-stroke: 0; /* Rimuove il contorno */
+            paint-order: stroke fill; /* Assicura che lo stroke sia sotto il fill */
         }
         
         p, li, a, input, label, span, div:not(h1):not(h2):not(h3):not(.pixel-font) {
@@ -1163,6 +1182,22 @@
         }
     </style>
     <style>
+        /* Aggiungo stili per rimuovere spazio bianco in eccesso nella sezione claim */
+        #howtoclaim {
+            min-height: 100vh;
+            height: auto;
+        }
+        
+        #howtoclaim .presale-box-content {
+            padding-bottom: 1rem;
+        }
+        
+        /* Rende il widget claim più compatto */
+        #howtoclaim .md\:w-2\/5 {
+            align-self: flex-start;
+        }
+    </style>
+    <style>
         /* Additional mobile optimizations for the FAQ section */
         @media (max-width: 640px) {
             #faq {
@@ -1310,15 +1345,138 @@
             }
         }
     </style>
+    <style>
+        /* Additional styles to ensure progress bar displays correctly */
+        #presaleProgress {
+            width: 0% !important; /* Start at 0 and will be updated by JS */
+            transition: width 1s ease-in-out;
+            min-width: 2%; /* Ensure text is visible even at very low percentages */
+        }
+        
+        /* Force redraw of progress bar to overcome browser caching issues */
+        .refresh-display {
+            animation: forceRedraw 0.1s linear forwards;
+        }
+        
+        @keyframes forceRedraw {
+            from { opacity: 0.99; }
+            to { opacity: 1; }
+        }
+    </style>
+    <!-- Aggiungiamo stili per forzare il rendering delle sezioni aggiornate -->
+    <style>
+        @keyframes highlight-update {
+            0% { background-color: rgba(106, 13, 173, 0.1); }
+            50% { background-color: rgba(106, 13, 173, 0.2); }
+            100% { background-color: rgba(106, 13, 173, 0); }
+        }
+        
+        .claim-updated {
+            animation: highlight-update 1s ease-out;
+        }
+        
+        .status-updated {
+            animation: highlight-update 1s ease-out;
+        }
+        
+        /* Risolve problema di forzatura visualizzazione componenti claim */
+        #howtoclaim .text-xl.font-black.text-frogBlack {
+            min-height: 1.5rem;
+            display: inline-block;
+        }
+        
+        #claimWalletStatus {
+            min-height: 60px;
+        }
+
+        /* Stile compatto per il riquadro wallet connected */
+        .wallet-connected-compact {
+            padding: 3px;
+            border-radius: 6px;
+            margin: 0;
+        }
+        .wallet-connected-compact p {
+            margin: 0;
+            line-height: 1.2;
+        }
+    </style>
+    <style>
+        @keyframes priceUpdatedPulse {
+            0% { color: inherit; background-color: inherit; }
+            50% { color: #22c55e; background-color: rgba(34, 197, 94, 0.1); }
+            100% { color: inherit; background-color: inherit; }
+        }
+        
+        .price-updated {
+            animation: priceUpdatedPulse 2s ease-in-out;
+            border-radius: 4px;
+            padding: 2px 4px;
+            transition: all 0.3s ease;
+        }
+    </style>
+
+    <!-- Custom integration JS scripts -->
+    <script src="js/wallet-adapters.js"></script>
+    <script src="js/wallet-connect.js"></script>
+    <!-- duplicate wallet-integration.js include removed -->
+    
+    <!-- Price fixer script - Risolve problemi con la connessione wallet e il prezzo Solana -->
+    <script src="js/price-fixer.js"></script>
 </head>
 <body>
+    <!-- Script per controllare lo stato del disclaimer all'avvio -->
+    <script>
+        // Eseguito immediatamente
+        (function() {
+            if (localStorage.getItem('disclaimerAccepted') === 'true') {
+                setTimeout(function() {
+                    var disclaimerModal = document.getElementById('disclaimerModal');
+                    if (disclaimerModal) {
+                        disclaimerModal.style.display = 'none';
+                    }
+                }, 100);
+            }
+        })();
+    </script>
+
+    <!-- Fix per il disclaimer -->
+    <script>
+        // Script immediato per gestire il pulsante del disclaimer
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Inizializzazione script disclaimer diretto");
+            const disclaimerModal = document.getElementById('disclaimerModal');
+            const acceptButton = document.getElementById('acceptDisclaimer');
+            
+            if (disclaimerModal && acceptButton) {
+                console.log("Elementi disclaimer trovati");
+                
+                // Verifica se il disclaimer è già stato accettato
+                if (localStorage.getItem('disclaimerAccepted') === 'true') {
+                    disclaimerModal.style.display = 'none';
+                } else {
+                    disclaimerModal.style.display = 'flex';
+                }
+                
+                // Event listener diretto per il pulsante - questo avrà priorità
+                acceptButton.onclick = function(event) {
+                    event.preventDefault();
+                    console.log("Pulsante disclaimer cliccato");
+                    localStorage.setItem('disclaimerAccepted', 'true');
+                    disclaimerModal.style.display = 'none';
+                };
+            } else {
+                console.error("Elementi disclaimer non trovati");
+            }
+        });
+    </script>
+
     <!-- Modal Disclaimer (NFA/DYOR) -->
     <div id="disclaimerModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
         <div class="speech-bubble bg-frogMedium max-w-md mx-4">
-            <h2 class="text-white text-2xl mb-4 pixel-font">RIBBIT! DISCLAIMER</h2>
+            <h2 class="text-frogYellow text-2xl mb-4 pixel-font font-bold">RIBBIT! DISCLAIMER</h2>
             <p class="mb-4 text-lg text-white">$FROGGLE is a meme coin with no intrinsic value or financial expectation.</p>
             <p class="mb-4 text-white">This is <span class="font-bold text-white">NOT FINANCIAL ADVICE</span>. Please <span class="font-bold text-white">DO YOUR OWN RESEARCH</span> before participating.</p>
-            <button id="acceptDisclaimer" class="w-full bg-frogLight hover:bg-opacity-80 text-frogDark font-bold py-2 px-4 rounded-cartoon btn">
+            <button id="acceptDisclaimer" onclick="localStorage.setItem('disclaimerAccepted', 'true'); this.parentElement.parentElement.style.display = 'none';" class="w-full bg-frogLight hover:bg-opacity-80 text-frogDark font-bold py-2 px-4 rounded-cartoon btn">
                 I UNDERSTAND, LET'S RIBBIT!
             </button>
         </div>
@@ -1381,27 +1539,27 @@
     </section>
 
     <!-- About Us Section -->
-    <section id="about" class="py-16 bg-gradient-to-r from-frogPurpleNew to-frogMedium">
+    <section id="about" class="py-20 bg-gradient-to-r from-frogPurpleNew to-frogMedium">
         <div class="container mx-auto">
-            <div class="flex flex-col md:flex-row items-center justify-center gap-8 max-w-6xl mx-auto">
+            <div class="flex flex-col md:flex-row items-center justify-center gap-10 max-w-7xl mx-auto">
                 <!-- Image on the left -->
                 <div class="md:w-1/2 flex justify-center">
-                    <img src="sfondo1.png" alt="FROGGLE Logo" class="w-64 md:w-[450px] lg:w-[600px] rounded-full border-4 border-frogLight shadow-xl">
+                    <img src="sfondo1.png" alt="FROGGLE Logo" class="w-72 md:w-[500px] lg:w-[650px] rounded-full border-8 border-black shadow-2xl" style="box-shadow: 0 0 30px rgba(0,0,0,0.7), 0 0 15px #8A2BE2;">
                 </div>
                 
                 <!-- About text on the right -->
                 <div class="md:w-1/2 text-white">
-                    <h2 class="text-4xl font-bold mb-6 text-frogYellow">About $FROGGLE</h2>
+                    <h2 class="text-5xl font-bold mb-8 text-frogYellow">About $FROGGLE</h2>
                     
-                    <p class="mb-4 text-lg">$FROGGLE is not just another meme coin – it's a vibrant community-driven project that brings the fun and whimsy of frogs to the Solana blockchain.</p>
+                    <p class="mb-5 text-xl">$FROGGLE is not just another meme coin – it's a vibrant community-driven project that brings the fun and whimsy of frogs to the Solana blockchain.</p>
                     
-                    <p class="mb-4">Born out of a passion for creating a friendly and engaging crypto community, $FROGGLE combines the lighthearted nature of meme coins with a strong commitment to community growth and transparency.</p>
+                    <p class="mb-5 text-lg">Born out of a passion for creating a friendly and engaging crypto community, $FROGGLE combines the lighthearted nature of meme coins with a strong commitment to community growth and transparency.</p>
                     
-                    <p class="mb-6">Our mission is simple: create a fun, inclusive environment for crypto enthusiasts while building long-term value for our holders. With $FROGGLE, you're not just investing in a token – you're joining a movement!</p>
+                    <p class="mb-8 text-lg">Our mission is simple: create a fun, inclusive environment for crypto enthusiasts while building long-term value for our holders. With $FROGGLE, you're not just investing in a token – you're joining a movement!</p>
                     
-                    <div class="flex space-x-4">
-                        <a href="#presale" class="bg-frogLight text-frogDark px-6 py-3 rounded-lg font-bold hover:bg-opacity-80 transition-all border-2 border-white">Join Presale</a>
-                        <a href="#tokenomics" class="bg-transparent text-white px-6 py-3 rounded-lg font-bold hover:bg-frogDark transition-all border-2 border-white">Tokenomics</a>
+                    <div class="flex space-x-5">
+                        <a href="#presale" class="bg-frogLight text-frogDark px-8 py-4 rounded-lg font-bold hover:bg-opacity-80 transition-all border-2 border-white text-lg">Join Presale</a>
+                        <a href="#tokenomics" class="bg-transparent text-white px-8 py-4 rounded-lg font-bold hover:bg-frogDark transition-all border-2 border-white text-lg">Tokenomics</a>
                     </div>
                 </div>
             </div>
@@ -1422,12 +1580,12 @@
                         <!-- Progress Bar -->
                         <div class="mb-4 md:mb-6">
                             <div class="h-5 md:h-6 bg-white rounded-full overflow-hidden border-2 border-frogLight">
-                                <div id="presaleProgress" class="h-full bg-frogLight flex items-center justify-end pr-2" style="width: 0%;">
+                                <div id="presaleProgress" class="h-full bg-frogLight flex items-center justify-end pr-2" style="width: 0% !important; transition: width 0.5s ease-in-out; min-width: 40px;" data-current-percentage="0">
                                     <span id="presaleProgressText" class="text-frogDark font-bold text-xs md:text-sm leading-5 md:leading-6">0%</span>
                                 </div>
                             </div>
-                            <div class="text-center text-xs md:text-sm mt-1 md:mt-2 text-frogBlack">
-                                Sold: <span id="tokensSold">0</span> / 400,000,000 $FROGGLE
+                            <div class="text-center text-sm mt-2 text-black font-bold" id="raisedUSDInfo" style="color: #000000 !important;">
+                                $0 / 392,000$ collected
                             </div>
                         </div>
                         
@@ -1439,9 +1597,9 @@
                             </div>
                             <div class="text-center">
                                 <p class="text-frogBlack mb-1 text-xs md:text-sm">Listing price</p>
-                                <div class="flex items-center">
-                                    <p class="text-base md:text-xl font-black text-frogBlack">0.00600$</p>
-                                    <span class="ml-1 md:ml-2 text-base md:text-xl font-bold text-frogMedium">X6</span>
+                                <div class="flex items-center mt-1">
+                                    <span class="text-base md:text-xl font-extrabold text-frogBlack">0.00300$</span>
+                                    <span class="ml-1 md:ml-2 text-base md:text-xl font-bold text-frogMedium">X3</span>
                                 </div>
                             </div>
                         </div>
@@ -1459,17 +1617,25 @@
                             </div>
                         </div>
                         
+                        <!-- Informazioni sui tassi di cambio -->
+                        <div class="mb-2 text-center">
+                            <div id="exchangeRatesInfo" class="text-xs text-green-500 font-semibold mt-1">
+                                <!--Valorizzato via JavaScript-->
+                            </div>
+                        </div>
+                        
                         <!-- Step 2 -->
-                        <div class="mb-3 md:mb-4">
-                            <h3 class="text-sm md:text-base font-semibold text-frogBlack mb-1 md:mb-2">Step 2: Put sum of tokens you want to invest</h3>
-                            <div class="flex items-center gap-2 mb-1 md:mb-2">
+                        <div class="mb-3">
+                            <h3 class="text-sm md:text-base font-semibold text-frogBlack mb-1">Step 2: Put sum of tokens you want to invest</h3>
+                            <div class="flex items-center gap-2 mb-1">
                                 <div class="flex-1">
                                     <input type="number" id="solAmount" placeholder="1.0000" class="w-full bg-white border-2 border-frogLight rounded-full p-1 md:p-2 text-sm md:text-base text-frogBlack font-bold appearance-none" step="0.0001" min="0" />
                                 </div>
                                 <div>
-                                    <span class="text-sm md:text-base font-bold text-frogBlack">SOL</span>
+                                    <span id="currencyLabel" class="text-sm md:text-base font-bold text-frogBlack">SOL</span>
                                 </div>
                             </div>
+                            <div id="calculationDetails" class="text-xs font-semibold mb-1 text-center"></div>
                             <div class="flex items-center gap-2">
                                 <div class="flex-1">
                                     <input type="text" id="tokenAmount" readonly placeholder="0" class="w-full bg-white border-2 border-frogLight rounded-full p-1 md:p-2 text-sm md:text-base text-frogBlack font-bold">
@@ -1480,21 +1646,21 @@
                                 </div>
                             </div>
                             <!-- Bonus / Total -->
-                            <div class="text-center mt-2 text-frogBlack text-xs md:text-sm">
+                            <div class="hidden">
                                 <p>Bonus: <span id="bonusAmount">0 $FROGGLE</span></p>
                                 <p>Total: <span id="totalAmount">0 $FROGGLE</span></p>
                             </div>
                         </div>
                         
                         <!-- Buy Button -->
-                        <button id="buyButton" class="w-full bg-frogLight hover:bg-opacity-90 text-frogDark text-xl font-black py-2 px-6 rounded-full shadow-lg transition-all mb-4">
+                        <button id="buyButton" class="w-full bg-frogLight hover:bg-opacity-90 text-frogDark text-xl font-black py-2 px-6 rounded-full shadow-lg transition-all mb-1">
                             BUY $FROGGLE
                         </button>
                         
                         <!-- Wallet Status -->
-                        <div id="walletStatus" class="text-center text-frogBlack mb-3 text-sm">
-                            <p>Wallet: <span id="walletAddress">Not Connected</span></p>
-                            <p class="text-xs text-frogBlack mt-1">
+                        <div id="walletStatus" class="text-center text-black mb-2 text-sm">
+                            <p class="text-black">Wallet: <span id="walletAddress" class="text-black font-semibold">Not Connected</span></p>
+                            <p class="text-xs text-black">
                                 If you use Trust Wallet it only works correctly with native SOL tokens
                             </p>
                         </div>
@@ -1523,7 +1689,7 @@
                                 <p class="text-white text-sm mb-2">All SOL from purchases is sent to a secure escrow smart contract:</p>
                                 <div class="bg-frogIndigo p-2 rounded overflow-hidden mb-2 border border-frogYellow">
                                     <code class="text-xs text-frogAccent break-all">
-                                        9YxvANCGh8kpnD5RL48CpzA5QAzVPuYeaLbYqdEmaJc3
+                                        6sY8rEL3yhC4XC14NJUxwujMemz5d2QNSh6VRBymQ6eS
                                     </code>
                                 </div>
                                 <p class="text-white text-sm">The funds are locked until the presale ends on June 1, 2025.</p>
@@ -1553,146 +1719,184 @@
     
     <!-- Add JavaScript for calculating token amount -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Ensure wallet connection is initialized
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (window.walletManagementListenersAdded) return;
+            window.walletManagementListenersAdded = true;
+
+            console.log("DOMContentLoaded - Inizializzazione applicazione...");
+
+            // Inizializza la connessione base e i tassi
             if (typeof initConnection === 'function') {
-                initConnection();
+                try {
+                await initConnection();
+                    console.log("Connessione e tassi inizializzati con successo");
+                } catch (e) {
+                    console.error("Errore durante l'inizializzazione della connessione:", e);
+                }
             }
 
-            // Disclaimer Modal
+            // Aggiorna i tassi di cambio e i valori dei token da CoinGecko all'avvio
+            if (typeof updatePresaleInfo === 'function') {
+                try {
+                    const presaleInfo = await updatePresaleInfo();
+                    console.log("Prezzi e tassi aggiornati all'avvio:", presaleInfo);
+                    
+                    // Aggiorna anche l'interfaccia utente dopo il caricamento dei tassi
+                    if (typeof updateExchangeRatesInfo === 'function') {
+                        await updateExchangeRatesInfo('SOL');
+                    }
+                    
+                    // Forza il calcolo iniziale dei token se c'è un valore di input
+                    const solInput = document.getElementById('solAmount');
+                    if (solInput && solInput.value) {
+                        if (typeof updateInputValues === 'function') {
+                            await updateInputValues();
+                        }
+                    }
+                } catch (e) {
+                    console.error("Errore nell'aggiornamento dei tassi all'avvio:", e);
+                }
+            }
+
+            // Gestione disclaimer
             const disclaimerModal = document.getElementById('disclaimerModal');
             const acceptButton = document.getElementById('acceptDisclaimer');
-            
-            // Check if user has already accepted disclaimer
-            if (!localStorage.getItem('disclaimerAccepted')) {
-                disclaimerModal.style.display = 'flex';
-            } else {
-                disclaimerModal.style.display = 'none';
+            if (disclaimerModal && acceptButton) {
+                // Controlla se il disclaimer è già stato accettato
+                if (!localStorage.getItem('disclaimerAccepted')) {
+                    disclaimerModal.style.display = 'flex';
+                } else {
+                    disclaimerModal.style.display = 'none';
+                }
+                
+                // Event listener per il pulsante di accettazione
+                acceptButton.addEventListener('click', function() {
+                    console.log("Disclaimer accettato");
+                    localStorage.setItem('disclaimerAccepted', 'true');
+                    disclaimerModal.style.display = 'none';
+                });
             }
-            
-            acceptButton.addEventListener('click', function() {
-                localStorage.setItem('disclaimerAccepted', 'true');
-                disclaimerModal.style.display = 'none';
-            });
-            
-            // Ensure Hero section is visible
-            const heroSection = document.querySelector('section.bg-gradient-to-r');
-            if(heroSection) {
-                heroSection.style.display = 'flex';
-                heroSection.style.visibility = 'visible';
-                heroSection.style.opacity = '1';
-            }
-            
-            // Initialize wallet management modal
-            const walletManagementModal = document.getElementById('walletManagementModal');
-            const closeWalletManagementBtn = document.getElementById('closeWalletManagementBtn');
-            const manageWalletBtn = document.getElementById('manageWalletBtn');
-            const disconnectWalletBtn = document.getElementById('disconnectWalletBtn');
 
-            // Initialize purchase success modal
-            const purchaseSuccessModal = document.getElementById('purchaseSuccessModal');
-            const closePurchaseSuccessBtn = document.getElementById('closePurchaseSuccessBtn');
-            const goToClaimBtn = document.getElementById('goToClaimBtn');
-            
-            // Manage wallet button event
-            if (manageWalletBtn) {
-                manageWalletBtn.addEventListener('click', function() {
-                    walletManagementModal.classList.remove('hidden');
-                    fetchActivity();
-                });
+            // Inizializza i tassi di cambio sulla UI
+            if (typeof updateExchangeRatesInfo === 'function') {
+                // Gestione asincrona
+                updateExchangeRatesInfo('SOL').catch(e => console.error("Error updating exchange rates:", e));
             }
-            
-            // Close wallet management modal
-            if (closeWalletManagementBtn) {
-                closeWalletManagementBtn.addEventListener('click', function() {
-                    walletManagementModal.classList.add('hidden');
-                });
-            }
-            
-            // Disconnect wallet
-            if (disconnectWalletBtn) {
-                disconnectWalletBtn.addEventListener('click', function() {
-                    if (typeof window.solana !== 'undefined') {
-                        window.solana.disconnect();
-                        wallet = null;
+
+            // Controlla se il wallet Phantom è già connesso e inizializza la UI di conseguenza
+            // Questo viene eseguito con un breve ritardo per dare tempo a Phantom di caricarsi
+            setTimeout(async () => {
+                if (window.solana && window.solana.isPhantom && window.solana.isConnected) {
+                    console.log("Phantom wallet già connesso all'avvio.");
+                    wallet = window.solana; // Imposta il wallet globalmente
+                    try {
+                        const publicKey = wallet.publicKey.toString();
                         
-                        // Update UI
+                        // Aggiorna UI stato connessione
                         const walletAddrElem = document.getElementById("walletAddress");
-                        if (walletAddrElem) {
-                            walletAddrElem.textContent = "Not Connected";
+                        if (walletAddrElem) walletAddrElem.textContent = publicKey;
+                        const navBtn = document.getElementById('navConnectWalletBtn');
+                        if (navBtn) navBtn.textContent = shortAddr(publicKey);
+                        document.querySelectorAll('.connect-wallet').forEach(btn => {
+                            btn.textContent = shortAddr(publicKey);
+                            btn.classList.add('bg-green-500');
+                        });
+
+                        // Mostra "Checking for purchases..." nella sezione claim
+                        const claimWalletStatus = document.getElementById('claimWalletStatus');
+                        if (claimWalletStatus) {
+                            claimWalletStatus.innerHTML = `
+                                <p class="text-frogBlack font-semibold">Wallet connected!</p>
+                                <p class="text-frogBlack text-sm mt-1">Checking for purchases...</p>
+                            `;
+                        }
+
+                        // Tenta di recuperare i token del wallet
+                        console.log("Tentativo di fetchWalletTokens all'avvio...");
+                        if (typeof window.fetchWalletTokens === 'function') {
+                            await window.fetchWalletTokens(); 
+                            console.log("fetchWalletTokens completato all'avvio.");
+                        } else {
+                            console.error("window.fetchWalletTokens non è una funzione all'avvio.");
                         }
                         
-                        // Update buttons
-                        const connectBtns = document.querySelectorAll('.connect-wallet');
-                        connectBtns.forEach(btn => {
-                            btn.textContent = "CONNECT WALLET";
-                            btn.classList.remove('bg-green-500');
-                        });
-                        
-                        // Close the modal
-                        walletManagementModal.classList.add('hidden');
+                        // Aggiorna anche la progress bar e altre info
+                        if (typeof refreshProgress === 'function') {
+                            await refreshProgress();
+                        }
+
+                    } catch (error) {
+                        console.error("Errore durante l'aggiornamento UI per wallet pre-connesso:", error);
                     }
-                });
-            }
-            
-            // Close purchase success modal
-            if (closePurchaseSuccessBtn) {
-                closePurchaseSuccessBtn.addEventListener('click', function() {
-                    purchaseSuccessModal.classList.add('hidden');
-                    // Scroll to how to claim section
-                    document.getElementById('howtoclaim').scrollIntoView({ behavior: 'smooth' });
-                });
-            }
-            
-            // Go to claim button
-            if (goToClaimBtn) {
-                goToClaimBtn.addEventListener('click', function() {
-                    purchaseSuccessModal.classList.add('hidden');
-                    // Scroll to how to claim section
-                    document.getElementById('howtoclaim').scrollIntoView({ behavior: 'smooth' });
-                });
-            }
-            
-            // Inizializza la connessione Solana
-            initConnection();
-            
+                } else {
+                    console.log("Phantom wallet non connesso all'avvio o non trovato.");
+                    // Assicurati che la UI mostri lo stato di disconnessione se non connesso
+                    const claimWalletStatus = document.getElementById('claimWalletStatus');
+                    if (claimWalletStatus) {
+                         claimWalletStatus.innerHTML = '<p class="text-frogBlack">Please connect your wallet to check claim status</p>';
+                    }
+                    const claimBalanceElements = document.querySelectorAll('#howtoclaim .text-xl.font-black.text-frogBlack');
+                    if (claimBalanceElements.length > 0) {
+                        claimBalanceElements[0].textContent = "0 $FROGGLE";
+                        claimBalanceElements[1].textContent = "0 USD";
+                    }
+                }
+            }, 500); // Aumentato leggermente il timeout per dare più tempo a Phantom
+
             // Aggiungi event listener ai pulsanti connect-wallet
             document.querySelectorAll('.connect-wallet').forEach(button => {
-                button.addEventListener('click', connectWallet);
+                button.addEventListener('click', async () => {
+                    console.log("Connect wallet button clicked!");
+                    if (typeof window.openWalletModal === 'function') {
+                        window.openWalletModal();
+                    } else if (typeof openWalletModal === 'function') {
+                        openWalletModal();
+                    } else if (typeof window.connectWallet === 'function') {
+                        window.connectWallet();
+                    } else if (typeof connectWallet === 'function') {
+                        connectWallet();
+                    } else {
+                        console.error("Nessuna funzione di connessione wallet disponibile");
+                        alert("Errore: funzione di connessione wallet non disponibile");
+                    }
+                });
             });
-            
-            // Aggiungi event listener al campo input SOL
+
+            // ... (resto del codice DOMContentLoaded come event listeners per solBtn, usdtBtn, buyButton, etc.) ...
+            // Assicurati che il codice per solBtn, usdtBtn, refreshRatesBtn, buyButton, etc. sia qui DENTRO DOMContentLoaded
+
+            // Input amount event (migliorato)
             const solInput = document.getElementById('solAmount');
             if (solInput) {
                 solInput.addEventListener('input', async function() {
                     const amount = parseFloat(this.value) || 0;
-                    const presaleInfo = await updatePresaleInfo();
+                    const currencySymbol = document.getElementById('currencyLabel');
+                    const currentCurrency = currencySymbol ? currencySymbol.textContent : 'SOL';
+                    console.log(`Input utente: ${amount} ${currentCurrency}`);
                     
-                    if (presaleInfo) {
-                        const tokenAmount = calculateTokenAmount(amount, presaleInfo);
-                        
-                        // Aggiorna campo token
-                        const tokenOutput = document.getElementById('tokenAmount');
-                        if (tokenOutput) {
-                            tokenOutput.value = tokenAmount.toLocaleString();
-                        }
+                    // Utilizzo updateInputValues che ora gestisce anche il controllo del minimo acquistabile
+                    if (typeof updateInputValues === 'function') {
+                        await updateInputValues();
                     }
                 });
+                
+                // Aggiungiamo un timer di aggiornamento periodico per mantenere il prezzo SOL aggiornato
+                setInterval(async () => {
+                    if (solInput.value) {
+                        // Se c'è un valore nell'input, aggiorniamo regolarmente il calcolo
+                        if (typeof updateInputValues === 'function') {
+                            await updateInputValues();
+                        }
+                    }
+                }, 60000); // Aggiorna ogni minuto
             }
-            
-            // Update buttons
-            const connectBtns = document.querySelectorAll('.connect-wallet');
-            connectBtns.forEach(btn => {
-                btn.textContent = window.wallet ? shortAddr(window.wallet.publicKey.toString()) : "CONNECT WALLET";
-                if (window.wallet) btn.classList.add('bg-green-500');
-            });
 
             // Currency toggle functionality
             const solBtn = document.getElementById('solBtn');
             const usdtBtn = document.getElementById('usdtBtn');
-            const currencySymbol = document.querySelector('#solAmount + div span');
+            const currencySymbol = document.getElementById('currencyLabel');
             const buyButton = document.getElementById('buyButton');
-            let currentCurrency = 'SOL';
+            let currentCurrency = 'SOL'; // Default currency
 
             if (solBtn && usdtBtn) {
                 solBtn.addEventListener('click', () => {
@@ -1703,6 +1907,10 @@
                     usdtBtn.classList.remove('bg-frogMedium', 'text-white');
                     if (currencySymbol) currencySymbol.textContent = 'SOL';
                     if (buyButton) buyButton.textContent = 'BUY $FROGGLE';
+                    if (typeof updateExchangeRatesInfo === 'function') 
+                        updateExchangeRatesInfo('SOL').catch(e => console.error("Error updating exchange rates:", e));
+                    const solAmountInput = document.getElementById('solAmount');
+                    if (solAmountInput && solAmountInput.value) solAmountInput.dispatchEvent(new Event('input'));
                 });
 
                 usdtBtn.addEventListener('click', () => {
@@ -1713,107 +1921,187 @@
                     solBtn.classList.remove('bg-frogMedium', 'text-white');
                     if (currencySymbol) currencySymbol.textContent = 'USDT';
                     if (buyButton) buyButton.textContent = 'BUY WITH USDT';
+                    if (typeof updateExchangeRatesInfo === 'function') 
+                        updateExchangeRatesInfo('USDT').catch(e => console.error("Error updating exchange rates:", e));
+                    const solAmountInput = document.getElementById('solAmount');
+                    if (solAmountInput && solAmountInput.value) solAmountInput.dispatchEvent(new Event('input'));
                 });
             }
             
-            // Modified buy button handler
+            
+            // Buy button handler
             if (buyButton) {
                 buyButton.addEventListener('click', async function() {
                     const solInput = document.getElementById('solAmount');
                     if (!solInput || !solInput.value) {
-                        alert("Inserisci un importo valido");
-                        return;
+                        alert("Inserisci un importo valido"); return;
                     }
-                    
                     const amount = parseFloat(solInput.value);
                     if (isNaN(amount) || amount <= 0) {
-                        alert("Inserisci un importo valido");
-                        return;
+                        alert("Inserisci un importo valido"); return;
                     }
                     
                     let tx;
                     if (currentCurrency === 'SOL') {
                         tx = await buyTokensWithValidation(amount);
                     } else {
-                        // Use USDT method with validation
                         tx = await buyWithUSDTValidation(amount);
                     }
 
                     if (tx) {
-                        // Update claim section with token amount
-                        updateClaimSection(amount, currentCurrency);
-                        
-                        // Show success modal instead of alert
-                        purchaseSuccessModal.classList.remove('hidden');
+                        const purchaseSuccessModal = document.getElementById('purchaseSuccessModal');
+                        if(purchaseSuccessModal) purchaseSuccessModal.classList.remove('hidden');
+                        // La sezione claim ora si aggiorna automaticamente tramite refreshProgress e fetchWalletTokens chiamati da connectWallet e all'avvio
                     }
                 });
             }
-            
-            // Update function to handle both SOL and USDT
-            function updateClaimSection(amount, currency) {
-                let tokenAmount;
-                
-                if (currency === 'SOL') {
-                    const presaleInfo = {
-                        tokensPerSol: 102000,
-                        earlyBirdBonus: 0.15
-                    };
-                    
-                    const baseTokens = amount * presaleInfo.tokensPerSol;
-                    const bonusTokens = baseTokens * presaleInfo.earlyBirdBonus;
-                    tokenAmount = baseTokens + bonusTokens;
-                } else {
-                    const presaleInfo = {
-                        tokensPerUSDT: 1000,
-                        earlyBirdBonus: 0.15
-                    };
-                    
-                    const baseTokens = amount * presaleInfo.tokensPerUSDT;
-                    const bonusTokens = baseTokens * presaleInfo.earlyBirdBonus;
-                    tokenAmount = baseTokens + bonusTokens;
-                }
-                
-                // Fetch existing tokens for this wallet
-                fetchWalletTokens().then(existingTokens => {
-                    const totalTokens = Math.floor(tokenAmount) + existingTokens;
-                    
-                    // Update the claim section with token amount
-                    const claimBalanceElements = document.querySelectorAll('#howtoclaim .text-xl.font-black.text-frogBlack');
-                    if (claimBalanceElements.length > 0) {
-                        // Update FROGGLE balance
-                        claimBalanceElements[0].textContent = totalTokens.toLocaleString() + ' $FROGGLE';
-                        
-                        // Update USD value (estimated at $0.00600 per token)
-                        const usdValue = totalTokens * 0.00600;
-                        claimBalanceElements[1].textContent = usdValue.toLocaleString(undefined, {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2
-                        }) + ' USD';
+
+            // Wallet Management Modal Logic
+            const walletManagementModal1 = document.getElementById('walletManagementModal');
+            const closeWalletManagementBtn1 = document.getElementById('closeWalletManagementBtn');
+            const manageWalletBtn1 = document.getElementById('manageWalletBtn');
+            const disconnectWalletBtn1 = document.getElementById('disconnectWalletBtn');
+
+            if (manageWalletBtn1 && walletManagementModal1 && null) {
+                manageWalletBtn1.addEventListener('click', () => {
+                    if (!wallet || !wallet.publicKey) {
+                        alert("Per favore connetti il wallet prima di gestirlo");
+                        return;
                     }
-                    
-                    // Update claim status
-                    const claimWalletStatus = document.getElementById('claimWalletStatus');
-                    if (claimWalletStatus) {
-                        claimWalletStatus.innerHTML = `
-                            <p class="text-frogBlack font-semibold">Purchase Recorded!</p>
-                            <p class="text-frogBlack text-sm mt-1">Your tokens will be available after the presale ends on June 1, 2025</p>
-                        `;
-                    }
+                    walletManagementModal1.classList.remove('hidden');
+                    if (typeof fetchActivity === 'function') fetchActivity();
                 });
             }
-            
-            // Helper function to fetch existing tokens
-            async function fetchWalletTokens() {
-                if (!wallet?.publicKey) return 0;
-                try {
-                    const res = await fetch(`/api/purchases?wallet=${wallet.publicKey.toString()}`);
-                    const data = await res.json();
-                    return data.success ? data.totalFroggle : 0;
-                } catch (error) {
-                    console.error('Error fetching wallet tokens:', error);
-                    return 0;
-                }
+            if (closeWalletManagementBtn1 && walletManagementModal1) {
+                closeWalletManagementBtn1.addEventListener('click', () => walletManagementModal1.classList.add('hidden'));
             }
+            if (disconnectWalletBtn1 && typeof window.disconnectWallet === 'function') {
+                disconnectWalletBtn1.addEventListener('click', window.disconnectWallet);
+            }
+
+            // Purchase Success Modal Logic
+            const purchaseSuccessModal1 = document.getElementById('purchaseSuccessModal');
+            const closePurchaseSuccessBtn1 = document.getElementById('closePurchaseSuccessBtn');
+            const goToClaimBtn1 = document.getElementById('goToClaimBtn');
+
+            if (closePurchaseSuccessBtn1 && purchaseSuccessModal1) {
+                closePurchaseSuccessBtn1.addEventListener('click', () => {
+                    purchaseSuccessModal1.classList.add('hidden');
+                    const claimSection = document.getElementById('howtoclaim');
+                    if (claimSection) claimSection.scrollIntoView({ behavior: 'smooth' });
+                });
+            }
+            if (goToClaimBtn1 && purchaseSuccessModal1) {
+                goToClaimBtn1.addEventListener('click', () => {
+                    purchaseSuccessModal1.classList.add('hidden');
+                    const claimSection = document.getElementById('howtoclaim');
+                    if (claimSection) claimSection.scrollIntoView({ behavior: 'smooth' });
+                });
+            }
+
+    // Esponi fetchWalletTokens globalmente se non già fatto
+    if (typeof window.fetchWalletTokens !== 'function' && typeof fetchWalletTokens === 'function') {
+        window.fetchWalletTokens = fetchWalletTokens;
+    }
+
+    // Chiamata periodica a refreshProgress per mantenere aggiornata la barra
+    if (typeof refreshProgress === 'function') {
+        refreshProgress(); // Chiamata iniziale
+        setInterval(refreshProgress, 30000); // Ogni 30 secondi
+    }
+
+    // Wallet Management Modal & Activity Modal
+    const walletManagementModal = document.getElementById('walletManagementModal');
+    const activityModal = document.getElementById('activityModal');
+    const manageWalletBtn = document.getElementById('manageWalletBtn');
+    const viewActivityBtn = document.getElementById('viewActivityBtn');
+    const addFroggleBtn = document.getElementById('addFroggleBtn');
+    const disconnectWalletBtn = document.getElementById('disconnectWalletBtn');
+    const closeManagementBtn = document.getElementById('closeManagementBtn');
+    const closeActivityBtn = document.getElementById('closeActivityBtn');
+    const closeActivityModalBtn = document.getElementById('closeActivityModalBtn');
+    
+    // Manage wallet button
+    if (manageWalletBtn) {
+        manageWalletBtn.addEventListener('click', () => {
+            if (!wallet || !wallet.publicKey || !wallet.isConnected) {
+                alert("Per favore connetti il wallet prima di gestirlo");
+                return;
+            }
+            
+            // Aggiorna l'indirizzo del wallet nel modale
+            const managementWalletAddress = document.getElementById('managementWalletAddress');
+            if (managementWalletAddress) {
+                managementWalletAddress.textContent = wallet.publicKey.toString();
+            }
+            
+            // Mostra il modale di gestione
+            if (walletManagementModal) walletManagementModal.classList.remove('hidden');
+        });
+    }
+    
+    // View activity button
+    if (viewActivityBtn) {
+        viewActivityBtn.addEventListener('click', async () => {
+            // Chiudi il modale di gestione
+            if (walletManagementModal) walletManagementModal.classList.add('hidden');
+            
+            // Aggiorna i dati dell'attività
+            if (typeof fetchActivity === 'function') {
+                await fetchActivity();
+            }
+            
+            // Mostra il modale dell'attività
+            if (activityModal) activityModal.classList.remove('hidden');
+        });
+    }
+    
+    // Add FROGGLE to wallet button
+    if (addFroggleBtn) {
+        addFroggleBtn.addEventListener('click', async () => {
+            // Chiudi il modale di gestione
+            if (walletManagementModal) walletManagementModal.classList.add('hidden');
+            
+            // Aggiungi FROGGLE al wallet
+            if (typeof addFroggleToWallet === 'function') {
+                await addFroggleToWallet();
+            }
+        });
+    }
+    
+    // Disconnect wallet button
+    if (disconnectWalletBtn) {
+        disconnectWalletBtn.addEventListener('click', async () => {
+            // Chiudi il modale di gestione
+            if (walletManagementModal) walletManagementModal.classList.add('hidden');
+            
+            // Disconnetti il wallet
+            if (typeof disconnectWallet === 'function') {
+                await disconnectWallet();
+            }
+        });
+    }
+    
+    // Close wallet management modal
+    if (closeManagementBtn) {
+        closeManagementBtn.addEventListener('click', () => {
+            if (walletManagementModal) walletManagementModal.classList.add('hidden');
+        });
+    }
+    
+    // Close activity modal
+    if (closeActivityBtn) {
+        closeActivityBtn.addEventListener('click', () => {
+            if (activityModal) activityModal.classList.add('hidden');
+        });
+    }
+    
+    // Close activity modal with X
+    if (closeActivityModalBtn) {
+        closeActivityModalBtn.addEventListener('click', () => {
+            if (activityModal) activityModal.classList.add('hidden');
+        });
+    }
         });
     </script>
 
@@ -1919,9 +2207,9 @@
     </section>
 
     <!-- How to Claim Section -->
-    <section id="howtoclaim" class="h-screen flex items-center" style="background-image: url('immagine 1.png'); background-size: cover; background-position: center; position: relative;">
+    <section id="howtoclaim" class="min-h-screen flex items-center py-12" style="background-image: url('immagine 1.png'); background-size: cover; background-position: center; position: relative;">
         <div class="container mx-auto z-10 relative">
-            <h2 class="text-4xl text-center mb-8 text-frogYellow pixel-font drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">HOW TO CLAIM</h2>
+            <h2 class="text-4xl text-center mb-6 text-frogYellow pixel-font drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">HOW TO CLAIM</h2>
             
             <div class="max-w-6xl mx-auto">
                 <div class="flex flex-col md:flex-row gap-8">
@@ -1929,37 +2217,40 @@
                     <div class="md:w-3/5">
                         <div class="h-full flex flex-col">
                             <!-- Informazioni sulla release schedule -->
-                            <div class="backdrop-blur-sm bg-frogPurple/80 border-2 border-white/50 rounded-lg p-6 mb-6 shadow-2xl flex-grow">
-                                <h3 class="text-xl mb-4 text-frogGold">Token Release Schedule</h3>
-                                <p class="mb-4 text-white">After the presale ends on June 1, 2025, your $FROGGLE tokens will be available according to our release schedule:</p>
+                            <div class="backdrop-blur-sm bg-frogPurple/80 border-2 border-white/50 rounded-lg p-4 mb-4 shadow-2xl overflow-y-auto max-h-[60vh]">
+                                <h3 class="text-xl mb-2 text-frogGold">Token Release Schedule</h3>
+                                <p class="mb-3 text-white">After the presale ends on June 15, 2024, your $FROGGLE tokens will be available according to our release schedule:</p>
                                 
-                                <div class="mb-4">
-                                    <div class="flex justify-between mb-2">
+                                <div class="mb-3">
+                                    <div class="flex justify-between mb-1">
                                         <span class="text-white">First Release:</span>
-                                        <span class="text-frogGold">50% of your tokens</span>
+                                        <span class="text-frogGold">33% of your tokens</span>
                                     </div>
                                     <div class="progress-container h-6 bg-frogIndigo/60 rounded-full overflow-hidden border border-frogGold/50">
-                                        <div class="progress-bar h-full bg-frogGold flex items-center justify-end pr-2" style="width: 50%;">50%</div>
+                                        <div class="progress-bar h-full bg-frogGold flex items-center justify-end pr-2" style="width: 33%;">33%</div>
                                     </div>
                                 </div>
                                 
-                                <div class="space-y-3 mb-4">
-                                    <p class="font-bold text-white">Subsequent Releases:</p>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <div class="space-y-2 mb-3">
+                                    <p class="font-bold text-white">Monthly Releases:</p>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-1">
                                         <div>
-                                            <p class="text-frogGold text-sm">Phase 1: +5%</p>
-                                            <p class="text-frogGold text-sm">Phase 2: +5%</p>
-                                            <p class="text-frogGold text-sm">Phase 3: +5%</p>
-                                            <p class="text-frogGold text-sm">Phase 4: +5%</p>
-                                            <p class="text-frogGold text-sm">Phase 5: +5%</p>
+                                            <p class="text-frogGold text-sm">Month 1: +13.4%</p>
+                                            <p class="text-frogGold text-sm">Month 2: +13.4%</p>
+                                            <p class="text-frogGold text-sm">Month 3: +13.4%</p>
                                         </div>
                                         <div>
-                                            <p class="text-frogGold text-sm">Phase 6: +5%</p>
-                                            <p class="text-frogGold text-sm">Phase 7: +5%</p>
-                                            <p class="text-frogGold text-sm">Phase 8: +5%</p>
-                                            <p class="text-frogGold text-sm">Phase 9: +5%</p>
-                                            <p class="text-frogGold text-sm">Phase 10: +5%</p>
+                                            <p class="text-frogGold text-sm">Month 4: +13.4%</p>
+                                            <p class="text-frogGold text-sm">Month 5: +13.4%</p>
                                         </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-2 mb-3 border-t border-white/20 pt-3">
+                                    <p class="font-bold text-frogYellow">Anti-Dump Protections:</p>
+                                    <div class="grid grid-cols-1 gap-1">
+                                        <p class="text-white text-sm">• <span class="text-frogGold font-semibold">Daily sell limit:</span> Maximum 20% of your available tokens can be sold per day</p>
+                                        <p class="text-white text-sm">• <span class="text-frogGold font-semibold">Early exit penalty:</span> 10% fee on sales before full vesting period</p>
                                     </div>
                                 </div>
                                 
@@ -1990,49 +2281,94 @@
                     <!-- Colonna destra con claim widget -->
                     <div class="md:w-2/5 flex items-stretch">
                         <!-- Claim Widget (For after presale) -->
-                        <div class="w-full bg-white rounded-3xl p-6 shadow-lg border-4 border-frogLight presale-box-content">
-                            <div class="flex-grow flex flex-col justify-between">
+                        <div class="w-full bg-white rounded-3xl p-4 shadow-lg border-4 border-frogLight presale-box-content">
+                            <div class="flex flex-col justify-between h-auto">
                                 <div>
-                                    <h3 class="text-3xl text-center mb-6 text-frogBlack font-bold">Claim Your $FROGGLE</h3>
+                                    <h3 class="text-2xl text-center mb-3 text-frogBlack font-bold">Claim Your $FROGGLE</h3>
                                     
                                     <!-- Token Balance Information -->
-                                    <div class="mb-6 p-4 bg-white rounded-lg border-2 border-frogLight">
-                                        <div class="text-center mb-4">
+                                    <div class="mb-3 p-3 bg-white rounded-lg border-2 border-frogLight">
+                                        <div class="text-center mb-1">
                                             <p class="text-frogBlack mb-1 text-sm">Your $FROGGLE balance</p>
                                             <p class="text-xl font-black text-frogBlack mb-1">0 $FROGGLE</p>
                                             <p class="text-xs text-frogBlack">*Tokens will be distributed to your wallet only after end of presale</p>
                                         </div>
                                         
-                                        <div class="text-center mb-4">
+                                        <div class="text-center mb-1">
                                             <p class="text-frogBlack mb-1 text-sm">Balance at listing price</p>
                                             <p class="text-xl font-black text-frogBlack">0 USD</p>
                                         </div>
                                         
                                         <div class="text-center">
-                                            <p class="text-frogBlack mb-1 text-sm">Referral earnings</p>
+                                            <p class="text-frogBlack mb-0 text-sm">Referral earnings</p>
                                             <p class="text-xl font-black text-frogBlack">0 $FROGGLE</p>
                                         </div>
                                     </div>
                                     
                                     <!-- Claim Status -->
-                                    <div id="claimWalletStatus" class="mb-6 p-4 bg-white rounded-lg border-2 border-frogLight text-center">
+                                    <div id="claimWalletStatus" class="mb-3 p-2 bg-white rounded-lg border-2 border-frogLight text-center min-h-[45px] flex flex-col justify-center items-center">
                                         <p class="text-frogBlack">Please connect your wallet to check claim status</p>
                                     </div>
                                 </div>
                                 
-                                <div class="mt-auto">
                                     <!-- Claim Button (Disabled until presale ends) -->
-                                    <button id="claimButton" class="w-full bg-gray-500 text-white font-bold py-2 px-6 rounded-full shadow-lg transition-all cursor-not-allowed hover:bg-red-300 hover:text-red-700 hover:line-through hover:border-red-700 hover:border-2" disabled>
+                                <button id="claimButton" class="w-full bg-gray-500 text-white font-bold py-2 px-6 rounded-full shadow-lg transition-all cursor-not-allowed hover:bg-red-300 hover:text-red-700 hover:line-through hover:border-red-700 hover:border-2 mt-1" disabled>
                                         PRESALE STILL ACTIVE
                                     </button>
                                     
-                                    <p class="text-xs text-frogBlack mt-1">
+                                <p class="text-xs text-frogBlack mt-1 mb-0">
                                         Claiming will be available after the presale ends on June 1, 2025
                                     </p>
                                 </div>
                             </div>
                         </div>
                     </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How To Add FROGGLE To Your Wallet Section -->
+    <section id="howtoadd" class="py-20 bg-gradient-to-r from-frogDeep to-frogPurple">
+        <div class="container mx-auto px-4">
+            <h2 class="text-5xl text-center mb-16 text-frogYellow pixel-font">HOW TO ADD FROGGLE</h2>
+            
+            <p class="text-white text-center text-xl mb-12 max-w-3xl mx-auto">
+                FOLLOW THESE EASY STEPS TO ADD THE FROGGLE TOKEN TO YOUR WALLET.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+                <!-- Step 1 -->
+                <div class="bg-black p-6 rounded-lg border-2 border-frogYellow shadow-xl">
+                    <h3 class="text-4xl text-frogYellow pixel-font mb-4">1. CREATE A WALLET</h3>
+                    <p class="text-white mb-3 font-bold">VISIT <a href="https://phantom.app" target="_blank" class="text-red-500 hover:underline">PHANTOM.APP</a> AND FOLLOW THE SIMPLE STEPS TO CREATE A NEW ACCOUNT WITH THE PHANTOM APP OR BROWSER EXTENSION.</p>
+                </div>
+                
+                <!-- Step 2 -->
+                <div class="bg-black p-6 rounded-lg border-2 border-frogYellow shadow-xl">
+                    <h3 class="text-4xl text-frogYellow pixel-font mb-4">2. OPEN PHANTOM</h3>
+                    <p class="text-white mb-3 font-bold">GO TO YOUR PHANTOM WALLET AND CLICK ON "TOKENS" TAB AT THE BOTTOM. THEN CLICK THE "+" BUTTON TO ADD A NEW TOKEN.</p>
+                </div>
+                
+                <!-- Step 3 -->
+                <div class="bg-black p-6 rounded-lg border-2 border-frogYellow shadow-xl">
+                    <h3 class="text-4xl text-frogYellow pixel-font mb-4">3. ADD TOKEN</h3>
+                    <p class="text-white mb-3 font-bold">PASTE THIS ADDRESS IN THE SEARCH FIELD:</p>
+                    <div class="bg-gray-800 p-2 rounded mb-3 overflow-hidden">
+                        <code class="text-frogGold text-xs break-all">4b48dmT8DpV5PDkbuuXVgL9gKqSE9t1TwYVKkyFy1iRK</code>
+                    </div>
+                </div>
+                
+                <!-- Step 4 -->
+                <div class="bg-black p-6 rounded-lg border-2 border-frogYellow shadow-xl">
+                    <h3 class="text-4xl text-frogYellow pixel-font mb-4">4. CONFIRM IMPORT</h3>
+                    <p class="text-white mb-3 font-bold">VERIFY THE DETAILS:</p>
+                    <ul class="text-white space-y-1">
+                        <li>• NAME: FROGGLE</li>
+                        <li>• SYMBOL: FROG</li>
+                        <li>• DECIMALS: 9</li>
+                        <li>• NETWORK: SOLANA</li>
+                    </ul>
+                    <p class="text-frogGold mt-3 font-bold">CLICK "ADD" TO COMPLETE!</p>
                 </div>
             </div>
         </div>
@@ -2118,33 +2454,52 @@
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
     <script src="https://unpkg.com/@project-serum/anchor@0.25.0/dist/browser/anchor.min.js"></script>
     
+    <!-- SPL Token Helper personalizzato -->
+    <script src="js/libs/spl-token-helpers.js"></script>
+    
     <!-- Wallet Integration -->
     <script src="js/wallet-integration.js"></script>
     
     <!-- Wallet Management Modal -->
-    <div id="walletManagementModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-frogDark">Activity</h3>
-                <button id="closeWalletManagementBtn" class="text-2xl text-gray-700 hover:text-gray-900">&times;</button>
+    <div id="walletManagementModal" class="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 hidden backdrop-blur-sm">
+        <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
+            <h3 class="text-2xl font-bold text-frogBlack mb-4 text-center">Wallet Management</h3>
+            <div class="space-y-4">
+                <!-- Wallet Info -->
+                <div class="bg-gray-100 rounded-lg p-4">
+                    <p class="text-sm font-semibold text-gray-700 mb-1">Connected Wallet</p>
+                    <p id="managementWalletAddress" class="text-sm text-gray-900 font-bold break-all"></p>
             </div>
             
-            <div id="walletTransactions" class="py-6 flex flex-col items-center">
-                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                    <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M19 7h-1V6c0-1.1-.9-2-2-2H8C6.9 4 6 4.9 6 6v1H5c-1.1 0-2 .9-2 2v9c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm-7 10H5V9h7v8zm8 0h-6v-8h6v8zm-9-10V6h4v1h-4z"></path>
+            <!-- Actions -->
+                <div class="space-y-3">
+                    <!-- View Activity -->
+                    <button id="viewActivityBtn" class="w-full bg-frogLight hover:bg-opacity-90 text-frogDark font-bold py-3 px-4 rounded-full transition-all flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        View Activity
+                    </button>
+                    
+                    <!-- Add FROGGLE to Wallet -->
+                    <!-- Add FROGGLE button removed as per latest design -->
+                    
+                <!-- Disconnect Wallet -->
+                <button id="disconnectWalletBtn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-full transition-all flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                     </svg>
-                </div>
-                <p class="text-xl font-semibold text-center mb-2">No Transactions yet</p>
-                <p class="text-gray-500 text-center">Start trading on dApps<br>to grow your wallet!</p>
+                    Disconnect Wallet
+                </button>
             </div>
             
-            <button id="disconnectWalletBtn" class="w-full mt-6 py-3 px-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-full flex items-center justify-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                </svg>
-                Disconnect
-            </button>
+            <!-- Close Button -->
+                <div class="mt-4 text-center">
+                    <button id="closeManagementBtn" class="text-frogBlack font-medium hover:text-frogDark">
+                    Close
+                </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -2161,14 +2516,348 @@
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                     </svg>
                 </div>
-                <h3 class="text-2xl font-bold text-frogDark mb-2">Purchase Successful!</h3>
-                <p class="text-gray-600 mb-6">Your transaction has been confirmed. Check the Claim section to see how to receive your FROGGLE tokens.</p>
+                <h3 class="text-2xl font-bold text-frogDark mb-2 font-poppins" style="text-shadow: none;">Purchase Successful!</h3>
+                <p class="text-gray-600 mb-6 font-poppins">Your transaction has been confirmed. Check the Claim section to see how to receive your FROGGLE tokens.</p>
                 
-                <button id="goToClaimBtn" class="bg-frogLight text-frogDark font-bold py-3 px-8 rounded-full hover:bg-opacity-90 transition-all">
+                <button id="goToClaimBtn" class="bg-frogLight text-frogDark font-bold py-3 px-8 rounded-full hover:bg-opacity-90 transition-all font-poppins">
                     Go to Claim Section
                 </button>
             </div>
         </div>
     </div>
+
+    <script>
+        // Call refreshProgress periodically
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof refreshProgress === 'function') {
+                refreshProgress();
+                setInterval(refreshProgress, 30000); // every 30 seconds
+            }
+        });
+    </script>
+
+    <!-- Esponiamo fetchWalletTokens globalmente -->
+    <script>
+        window.fetchWalletTokens = fetchWalletTokens;
+    </script>
+
+    <!-- Custom JS for UI interactions -->
+    <script>
+        // ... existing code ...
+        
+        // Collega la funzione addFroggleToWallet al pulsante
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verifica se il pulsante esiste
+            const addFroggleBtn = document.getElementById('addFroggleToWallet');
+            if (addFroggleBtn) {
+                addFroggleBtn.addEventListener('click', function() {
+                    // Verifica se la funzione esiste
+                    if (typeof window.addFroggleToWallet === 'function') {
+                        window.addFroggleToWallet();
+                    } else {
+                        console.error("La funzione addFroggleToWallet non è disponibile");
+                        alert("Errore: Non è possibile aggiungere il token al momento. Ricarica la pagina e riprova.");
+                    }
+                });
+            }
+        });
+    </script>
+
+    <!-- Custom UI Script -->
+    <script>
+        // Espone le funzioni di wallet-integration.js globalmente
+        window.openWalletModal = openWalletModal;
+        window.closeWalletModal = closeWalletModal;
+        window.connectSpecificWallet = connectSpecificWallet;
+        
+        // Check wallet connection on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Controlliamo se il wallet è già connesso");
+            if (typeof checkWalletConnection === 'function') {
+                checkWalletConnection();
+            }
+            
+            // Show iOS-specific guidance if needed
+            const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            if (isIOS) {
+                console.log("iOS device detected, showing special instructions");
+                
+                // Insert a small speech-bubble near the frog (hero section) instead of a full-width banner
+                const frogWrapper = document.querySelector('#hero .relative');
+                if (frogWrapper) {
+                    const bubble = document.createElement('div');
+                    bubble.className = 'speech-bubble';
+                    bubble.style.cssText = `
+                        position: absolute;
+                        bottom: 28%;   /* adjust based on frog image */
+                        right: -6px;   /* little offset so tail points to mouth */
+                        max-width: 170px;
+                        background: #C8A2C8; /* frogLight */
+                        color: #4B0076;      /* frogDark */
+                        font-size: 11px;
+                        font-weight: bold;
+                        padding: 6px 10px;
+                        border: 3px solid #FFFFFF;
+                        border-radius: 1rem;
+                        box-shadow: 0.35rem 0.35rem 0 rgba(0,0,0,0.3);
+                        transform: rotate(-2deg);
+                        z-index: 20;
+                    `;
+                    bubble.textContent = 'Open this site in the Phantom app browser!';
+                    frogWrapper.appendChild(bubble);
+                }
+            }
+        });
+    </script>
+
+    <!-- Wallet Connection Modal -->
+    <div id="walletModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-4 relative">
+            <button onclick="closeWalletModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                </button>
+                
+            <h3 class="text-2xl font-bold text-center mb-6 text-frogBlack pixel-font" style="text-shadow: none;">CONNECT WALLET</h3>
+            
+            <div class="space-y-4">
+                <!-- BEGIN new two-icon layout -->
+                <div class="flex justify-center gap-4">
+                    <!-- Phantom Icon -->
+                    <button id="phantomWalletButton" onclick="connectSpecificWallet('phantom')" class="flex flex-col items-center justify-center w-32 h-32 bg-white rounded-3xl border-2 border-frogLight hover:bg-frogLight/10 transition-all shadow">
+                        <img src="images/phantom-logo.png" alt="Phantom" class="w-12 h-12 mb-2 rounded-full" onerror="this.src='https://cdn.iconscout.com/icon/free/png-256/free-phantom-3629918-3031321.png'; this.onerror=null;">
+                        <span class="text-purple-600 font-bold text-sm pixel-font" style="text-shadow:none;">PHANTOM</span>
+                </button>
+                
+                    <!-- Solflare Icon -->
+                    <button onclick="connectSpecificWallet('solflare')" class="flex flex-col items-center justify-center w-32 h-32 bg-white rounded-3xl border-2 border-frogLight hover:bg-frogLight/10 transition-all shadow">
+                        <img src="images/solflare-logo.png" alt="Solflare" class="w-12 h-12 mb-2 rounded-full" onerror="this.src='https://cdn.solflare.com/assets/icons/512.png'; this.onerror=null;">
+                        <span class="text-purple-600 font-bold text-sm pixel-font" style="text-shadow:none;">SOLFLARE</span>
+                </button>
+                </div>
+                <!-- END new layout -->
+            </div>
+            
+            <p class="text-center text-sm text-gray-500 mt-6">
+                By connecting your wallet, you agree to our Terms of Service and Privacy Policy
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Define walletModal functions directly on the page for simplicity
+        function closeWalletModal() {
+            const modal = document.getElementById('walletModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+        
+        function openWalletModal() {
+            const modal = document.getElementById('walletModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        // Handle iOS Phantom button
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if on iOS
+            const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            
+            if (isIOS) {
+                const phantomBtn = document.getElementById('phantomWalletButton');
+                if (phantomBtn) {
+                    // Change text and add more information for iOS users
+                    const infoText = phantomBtn.querySelector('span');
+                    if (infoText) {
+                        infoText.innerHTML = 'PHANTOM <span class="text-xs font-normal ml-1" style="font-family: sans-serif;">(open Phantom app first)</span>';
+                    }
+                }
+            }
+        });
+    </script>
+
+    <!-- Activity Modal (separato dal Wallet Management) -->
+    <div id="activityModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl p-4 max-w-md w-full mx-4" style="max-height: 80vh; overflow-y: auto; display: flex; flex-direction: column;">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-lg font-bold text-frogDark font-poppins" style="text-shadow: none;">Activity</h3>
+                <button id="closeActivityModalBtn" class="text-2xl text-gray-700 hover:text-gray-900">&times;</button>
+            </div>
+            
+            <div id="walletTransactions" class="py-3 flex flex-col items-center font-poppins overflow-y-auto flex-grow">
+                <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 7h-1V6c0-1.1-.9-2-2-2H8C6.9 4 6 4.9 6 6v1H5c-1.1 0-2 .9-2 2v9c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm-7 10H5V9h7v8zm8 0h-6v-8h6v8zm-9-10V6h4v1h-4z"></path>
+                    </svg>
+                </div>
+                <p class="text-base font-semibold text-center mb-1">No Transactions yet</p>
+                <p class="text-gray-500 text-center text-xs">Start trading on dApps<br>to grow your wallet!</p>
+            </div>
+            
+            <div class="mt-4 text-center">
+                <button id="closeActivityBtn" class="py-2 px-6 bg-gray-200 hover:bg-gray-300 text-black font-semibold rounded-full text-sm">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // ... existing code ...
+            
+            // Wallet Management Modal & Activity Modal
+            const walletManagementModal = document.getElementById('walletManagementModal');
+            const activityModal = document.getElementById('activityModal');
+            const manageWalletBtn = document.getElementById('manageWalletBtn');
+            const viewActivityBtn = document.getElementById('viewActivityBtn');
+            const addFroggleBtn = document.getElementById('addFroggleBtn');
+            const disconnectWalletBtn = document.getElementById('disconnectWalletBtn');
+            const closeManagementBtn = document.getElementById('closeManagementBtn');
+            const closeActivityBtn = document.getElementById('closeActivityBtn');
+            const closeActivityModalBtn = document.getElementById('closeActivityModalBtn');
+            
+            // Manage wallet button
+            if (manageWalletBtn) {
+                manageWalletBtn.addEventListener('click', () => {
+                    if (!wallet || !wallet.publicKey || !wallet.isConnected) {
+                        alert("Per favore connetti il wallet prima di gestirlo");
+                        return;
+                    }
+                    
+                    // Aggiorna l'indirizzo del wallet nel modale
+                    const managementWalletAddress = document.getElementById('managementWalletAddress');
+                    if (managementWalletAddress) {
+                        managementWalletAddress.textContent = wallet.publicKey.toString();
+                    }
+                    
+                    // Mostra il modale di gestione
+                    if (walletManagementModal) walletManagementModal.classList.remove('hidden');
+                });
+            }
+            
+            // View activity button
+            if (viewActivityBtn) {
+                viewActivityBtn.addEventListener('click', async () => {
+                    // Chiudi il modale di gestione
+                    if (walletManagementModal) walletManagementModal.classList.add('hidden');
+                    
+                    // Aggiorna i dati dell'attività
+                    if (typeof fetchActivity === 'function') {
+                        await fetchActivity();
+                    }
+                    
+                    // Mostra il modale dell'attività
+                    if (activityModal) activityModal.classList.remove('hidden');
+                });
+            }
+            
+            // Add FROGGLE to wallet button
+            if (addFroggleBtn) {
+                addFroggleBtn.addEventListener('click', async () => {
+                    // Chiudi il modale di gestione
+                    if (walletManagementModal) walletManagementModal.classList.add('hidden');
+                    
+                    // Aggiungi FROGGLE al wallet
+                    if (typeof addFroggleToWallet === 'function') {
+                        await addFroggleToWallet();
+                    }
+                });
+            }
+            
+            // Disconnect wallet button
+            if (disconnectWalletBtn) {
+                disconnectWalletBtn.addEventListener('click', async () => {
+                    // Chiudi il modale di gestione
+                    if (walletManagementModal) walletManagementModal.classList.add('hidden');
+                    
+                    // Disconnetti il wallet
+                    if (typeof disconnectWallet === 'function') {
+                        await disconnectWallet();
+                    }
+                });
+            }
+            
+            // Close wallet management modal
+            if (closeManagementBtn) {
+                closeManagementBtn.addEventListener('click', () => {
+                    if (walletManagementModal) walletManagementModal.classList.add('hidden');
+                });
+            }
+            
+            // Close activity modal
+            if (closeActivityBtn) {
+                closeActivityBtn.addEventListener('click', () => {
+                    if (activityModal) activityModal.classList.add('hidden');
+                });
+            }
+            
+            // Close activity modal with X
+            if (closeActivityModalBtn) {
+                closeActivityModalBtn.addEventListener('click', () => {
+                    if (activityModal) activityModal.classList.add('hidden');
+                });
+            }
+            
+            // ... rest of existing code ...
+        });
+    </script>
+    
+    <!-- Wallet Management Modal Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        // Elementi UI - Nota: alcune variabili sono già dichiarate sopra
+        const closeWalletManagementBtn = document.getElementById('closeWalletManagementBtn');
+        
+        // Gestione del pulsante closeWalletManagementBtn
+        if (closeWalletManagementBtn) {
+            closeWalletManagementBtn.addEventListener('click', () => {
+                const modal = document.getElementById('walletManagementModal');
+                if (modal) modal.classList.add('hidden');
+            });
+        }
+        
+        // Pulsante di aggiornamento tassi
+        const calcContainer = document.getElementById('calculationDetails');
+        if (calcContainer) {
+            const refreshRatesBtn = document.createElement('button');
+            refreshRatesBtn.className = 'text-xs text-blue-500 underline ml-2';
+            refreshRatesBtn.textContent = 'Aggiorna prezzi';
+            refreshRatesBtn.onclick = async () => {
+                refreshRatesBtn.textContent = 'Aggiornamento...';
+                refreshRatesBtn.disabled = true;
+                
+                try {
+                    if (typeof updatePresaleInfo === 'function') {
+                        await updatePresaleInfo();
+                        
+                        // Forza anche l'aggiornamento dell'UI
+                        const solInput = document.getElementById('solAmount');
+                        if (solInput && solInput.value && typeof updateInputValues === 'function') {
+                            await updateInputValues();
+                        }
+                    }
+                } catch (e) {
+                    console.error("Errore nell'aggiornamento manuale dei tassi:", e);
+                } finally {
+                    refreshRatesBtn.textContent = 'Aggiorna prezzi';
+                    refreshRatesBtn.disabled = false;
+                }
+            };
+            
+            // Aggiungi il pulsante dopo il primo refresh dei tassi
+            setTimeout(() => {
+                if (calcContainer.querySelector('span')) {
+                    calcContainer.appendChild(refreshRatesBtn);
+                }
+            }, 2000);
+            }
+        });
+    </script>
 </body>
 </html> 
