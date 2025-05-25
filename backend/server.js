@@ -32,8 +32,8 @@ let lastPriceFetch = 0;
 const PRICE_CACHE_DURATION_MS = 30 * 1000; // 30 secondi per aggiornamenti più frequenti
 
 // FROGGLE Token information
-const FROGGLE_MINT_ADDRESS = "4b48dmT8DpV5PDkbuuXVgL9gKqSE9t1TwYVKkyFy1iRK";
-const FROGGLE_ADMIN_TOKEN_ACCOUNT = "6boMZ7QTJ5hBpMSQJEsMDHsDuYiSswocdmASBnxkq3s9";
+const FROGGLE_MINT_ADDRESS = "7nckiGiAB19f1aQ31xdnEeHMxjkUpyaKdg8g6QBLMbUS";
+const FROGGLE_ADMIN_TOKEN_ACCOUNT = "Apea1N8nNavcLrS62GKTqfHHhsroDvtxVKNsPHJcoijJ";
 
 /**
  * Fetch current SOL → USD price (with simple in-memory caching)
@@ -376,9 +376,31 @@ app.get('/api/purchases', (req, res) => {
     
     // Filtriamo solo le transazioni valide del mainnet per questo wallet
     const validWalletPurchases = purchasesData.purchases.filter(p => {
-      const isValid = p.walletAddress === wallet && isValidSolanaSignature(p.transactionId);
-      console.log(`Validating transaction ${p.transactionId.substring(0, 10)}... for ${wallet}: ${isValid ? 'VALID' : 'INVALID'}`);
-      return isValid;
+      // Must be for the correct wallet
+      if (p.walletAddress !== wallet) {
+        return false;
+      }
+      
+      // Must have valid Solana signature format
+      if (!isValidSolanaSignature(p.transactionId)) {
+        console.log(`Validating transaction ${p.transactionId.substring(0, 10)}... for ${wallet}: INVALID - Bad signature format`);
+        return false;
+      }
+      
+      // Must not be a simulated/fake transaction
+      if (p.transactionId.includes('SIMULATED') || p.transactionId.includes('FAKE') || p.transactionId.includes('TEST')) {
+        console.log(`Validating transaction ${p.transactionId.substring(0, 10)}... for ${wallet}: INVALID - Simulated transaction`);
+        return false;
+      }
+      
+      // Must be explicitly verified
+      if (!p.verified) {
+        console.log(`Validating transaction ${p.transactionId.substring(0, 10)}... for ${wallet}: INVALID - Not verified`);
+        return false;
+      }
+      
+      console.log(`Validating transaction ${p.transactionId.substring(0, 10)}... for ${wallet}: VALID`);
+      return true;
     });
 
     // Calculate total FROGGLE purchased from valid transactions only
@@ -431,14 +453,26 @@ app.get('/api/total-raised', async (req, res) => {
     
     // STEP 3: Apply strict filtering for mainnet transactions only
     const mainnetTransactions = purchasesData.purchases.filter(p => {
-      // Reject any transaction that doesn't have a valid Solana signature
+      // FIRST: Reject any transaction that doesn't have a valid Solana signature
       if (!isValidSolanaSignature(p.transactionId)) {
         console.log(`REJECTED: ${p.transactionId} - Invalid Solana signature format`);
         return false;
       }
       
-      // Accept this transaction as valid
-      console.log(`ACCEPTED: ${p.transactionId} - Valid Solana transaction`);
+      // SECOND: Reject any transaction that is explicitly marked as simulated/fake
+      if (p.transactionId.includes('SIMULATED') || p.transactionId.includes('FAKE') || p.transactionId.includes('TEST')) {
+        console.log(`REJECTED: ${p.transactionId} - Simulated/fake transaction`);
+        return false;
+      }
+      
+      // THIRD: Only accept transactions that are explicitly verified
+      if (!p.verified) {
+        console.log(`REJECTED: ${p.transactionId} - Not verified (missing verified:true field)`);
+        return false;
+      }
+      
+      // Accept this transaction as valid mainnet transaction
+      console.log(`ACCEPTED: ${p.transactionId} - Valid verified mainnet transaction`);
       return true;
     });
     
